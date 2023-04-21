@@ -6,7 +6,7 @@ output:
   html_notebook: default
 ---
 
-###Dependencies
+### Dependencies
 ```{r}
 library(NbClust)
 library(mclust)
@@ -15,7 +15,7 @@ library(cluster)
 library(fpc)
 ```
 
-###Data Preparation
+### Data Preparation
 Import data and remove missing rows.
 ```{r}
 insurance <- read.csv("insurance.csv")
@@ -36,7 +36,7 @@ Using only statistically significant factors: age, bmi, children, smoker (yes).
 sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
 summary(sigFac)
 ```
-###Residual Plots
+### Residual Plots
 ```{r}
 par(mfrow=c(1,2))
 hist(sigFac$residuals, prob = TRUE)
@@ -45,7 +45,7 @@ lines(density(sigFac$residuals))
 qqnorm(y=sigFac$residuals)
 qqline(y=sigFac$residuals, datax = FALSE)
 ```
-###Testing Correlation With Clustering
+### Testing Correlation With Clustering
 Our previous model stated that age, bmi, children, smoker (yes) were all significant factors. We are now going to perform a clustering model to see if this still holds true.
 
 ```{r}
@@ -87,10 +87,10 @@ wssplot(insurance.scaled)
 ```{r}
 plotcluster(insurance.scaled, clusterInsurance$cluster)
 ```
-```{r}
-nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans")
-table(nc$Best.n[1,])
-```
+Commented out because of knitting issues. Returned k = 2 as optimal amount of clusters.
+#nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans")
+#table(nc$Best.n[1,])
+
 Optimal number of clusters using PAM
 ```{r}
 dist.mat<-daisy(insurance.scaled,  metric="euclidean")
