@@ -31,6 +31,17 @@ insurance$bmi <- as.numeric(insurance$bmi)
 mod<-lm(charges~., data=insurance)
 summary(mod)
 ```
+Finding residuals and QQ plots for all factors
+```{r}
+par(mfrow=c(1,2))
+hist(mod$residuals, prob = TRUE)
+lines(density(mod$residuals))
+
+qqnorm(y=mod$residuals)
+qqline(y=mod$residuals, datax = FALSE)
+```
+
+
 Using only statistically significant factors: age, bmi, children, smoker (yes).
 ```{r}
 sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
@@ -77,7 +88,7 @@ wssplot <- function(data, nc=15, seed=1234){
                for (i in 2:nc){
                     set.seed(seed)
                     wss[i] <- sum(kmeans(data, centers=i)$withinss)}
-                plot(1:nc, wss, type="b", xlab="Number of Clusters",
+                plot(1:nc, wss, main = "Finding Optimal Number of Clusters using Within Group Sum of Squares", type="b", xlab="Number of Clusters",
                      ylab="Within groups sum of squares")
 }
 
@@ -86,6 +97,7 @@ wssplot(insurance.scaled)
 
 ```{r}
 plotcluster(insurance.scaled, clusterInsurance$cluster)
+title("Graphical Representation of Clusters")
 ```
 Commented out because of knitting issues. Returned k = 2 as optimal amount of clusters.
 #nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans")
