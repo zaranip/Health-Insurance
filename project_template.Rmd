@@ -1,0 +1,133 @@
+---
+title: "Predicting Health Insurance Costs in the United States Using Patient Medical History"
+author: "Zara Nip and Nehal Linganur"
+date: "05/05/2023"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+# library load statements here- remember, no install statements.
+# some useful libraries you may find useful:
+library(knitr) # for rendering tables with the kable function.
+library(dplyr)
+library(ggplot2)
+```
+
+## 1. Project Overview. 
+
+Which factors impact an individual’s health insurance premium the most? Which factors are statistically significant? Given a sample person’s data, x, can we determine how much they will be charged? We hope to help people understand if they are overpaying or underpaying for health insurance compared to their peers. Government officials may also find this data useful for making conclusions about the overall affordability of health insurance. Please note this report only covers mainland U.S.
+
+Our domain spans finance, because of the insurance component; healthcare; and demographics, including sex, age, and number of children.
+
+Main purpose of the report and guiding questions you will investigate. Include any specific information about the domain and what you plan to study about that domain that the audience should know to understand the rest of your report.
+
+## 2. Data and Resources Used.
+
+Our main data set is from (https://www.kaggle.com/datasets/mirichoi0218/insurance). 
+Our Connecticut data is from (https://catalog.data.gov/dataset/insurance-company-complaints-resolutions-status-and-recoveries). 
+
+
+Describe where you obtained data from, what variables you used, their data types and distributions. Clearly describe what the variables measure.
+
+You can use this list format in markdown to describe variables if you wish:
+
+Variable name1: This variable measures...
+: Data Type: numeric
+: Range/Levels: 24-80
+
+Variable name2: This variable measures...
+: Data Type: categorical
+: Range/Levels: 4,5
+
+Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc.
+
+## 3. Analysis.
+
+This is where you explain the methods you used to carry out the analysis to investigate the guiding question(s). State what techniques you used, what variables were included. Identify the independent and dependent variables. Did you preprocess the data? Include the results of any modeling and explain what they mean.
+
+Code Chunks
+
+Examples of using R markdown and code chunks. See the links in the references section for more on using code chunk options to control rendering.
+
+Example of a code chunk that hides the code from being rendered:
+
+```{r echo=FALSE}
+my.vec <- runif(25, min = 0, max = 10) 
+```
+
+Create an example table and use kable to render it nicely:
+
+```{r echo=FALSE}
+example.table <- matrix(c(7, 5, 14, 19, 3, 2, 17, 6, 12), ncol=3, byrow=TRUE)
+colnames(example.table) <- c('colName1','colName2','colName3')
+rownames(example.table) <- c('rowName1','rowName2','rowName3')
+example.table <- as.table(example.table)
+
+kable(example.table, caption='The title that describes this table.')
+```
+
+Notice the table is automatically numbered.
+
+Rendering a barplot using the caption option:
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+
+counts <- table(mtcars$vs, mtcars$gear)
+my.plot<-barplot(counts, main="Car Distribution by Gears and VS",
+  xlab="Number of Gears", col=c("gray","gray43"),
+  ylim = c(0, max(counts) + 1),
+  legend = rownames(counts), beside=TRUE)
+text(x = my.plot, y = counts + 0.5, counts, cex = 0.8, col = "red")
+
+```
+
+Adding another plot:
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.align = 'center', fig.cap = "Bar Plot Example ggplot2"}
+ggplot(mtcars, aes(x = factor(cyl))) +
+  geom_bar() +
+  geom_text(aes(label = after_stat(count)), vjust=-1, stat = "count") +
+  xlab('cylinders') 
+```
+
+Notice the plots are automatically numbered.
+
+Adding a page break:
+
+\newpage
+
+## Summary and Conclusions.
+
+In this section, you briefly summarize what you did and state the conclusions that you have determined based on the results of what you did in the analysis part above. This should be a single paragraph. It is important to clearly state what you conclude about your results. Point out any possible problems that you that may have an effect on your conclusions. For example, small data size, lot of missing values, suspected 
+
+## References
+
+This part is a list of links to the data set(s) you used. Also include links to any resources you used in your project, such as code examples that you adapted to your project or tutorials on analysis techniques that were an important part of your project. You do not have to list any resources from our course material or from R documentation.
+
+* https://rmarkdown.rstudio.com/lesson-3.html 
+* https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
