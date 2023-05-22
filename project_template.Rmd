@@ -14,35 +14,109 @@ output:
 library(knitr) # for rendering tables with the kable function.
 library(dplyr)
 library(ggplot2)
+
+insurance <- read.csv("insurance.csv")
+insurance <- na.omit(insurance)
+insurance$age <- as.numeric(insurance$age)
+insurance$bmi <- as.numeric(insurance$bmi)
+insurance$sex <- as.factor(insurance$sex)
+insurance$smoker <- as.factor(insurance$smoker)
+insurance$region <- as.factor(insurance$region)
+
+connecticut <- read.csv("Insurance_Company_Complaints__Resolutions__Status__and_Recoveries.csv")
 ```
 
 ## 1. Project Overview. 
 
-Which factors impact an individual’s health insurance premium the most? Which factors are statistically significant? Given a sample person’s data, x, can we determine how much they will be charged? We hope to help people understand if they are overpaying or underpaying for health insurance compared to their peers. Government officials may also find this data useful for making conclusions about the overall affordability of health insurance. Please note this report only covers mainland U.S.
+Which factors impact an individual’s health insurance premium the most? Which factors are statistically significant? Given a sample person’s data, x, can we determine how much they will be charged? We hope to help people understand if they are overpaying or underpaying for health insurance compared to their peers. Government officials may also find this data useful for making conclusions about the overall affordability of health insurance. Please note this report only covers the mainland U.S.
+
+We additionally wanted to make a more comprehensive report of additional Connecticut data, given the first data set covers very broad regions and has already been cleaned up. Because the Connecticut data is publicly available, most information about the patients themselves are ommitted. Instead of factors going into a patient's insurance cost, we are interested in the correlation between "reason" and "subreason" for insurance companies covering certain costs. Additional material includes how long the ticket was openned and when it was closed.
 
 Our domain spans finance, because of the insurance component; healthcare; and demographics, including sex, age, and number of children.
 
-Main purpose of the report and guiding questions you will investigate. Include any specific information about the domain and what you plan to study about that domain that the audience should know to understand the rest of your report.
-
 ## 2. Data and Resources Used.
 
-Our main data set is from (https://www.kaggle.com/datasets/mirichoi0218/insurance). 
-Our Connecticut data is from (https://catalog.data.gov/dataset/insurance-company-complaints-resolutions-status-and-recoveries). 
+Our main data set is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/insurance). We initially were unsure of which variables were significant or not, hence our approach to take all factors into account (age, sex, bmi, children, smoker status, region) and finding which ones were statistically significant. The variables are described below.
 
+All empty rows were preeminently ommitted. There was no other data cleaning involved.
 
-Describe where you obtained data from, what variables you used, their data types and distributions. Clearly describe what the variables measure.
-
-You can use this list format in markdown to describe variables if you wish:
-
-Variable name1: This variable measures...
+Age: This variable measures the patient's age at the time of the hospital bill's creation.
 : Data Type: numeric
 : Range/Levels: 24-80
 
-Variable name2: This variable measures...
-: Data Type: categorical
-: Range/Levels: 4,5
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages', breaks = 15)
 
-Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc.
+```
+As we see from the graph above, each age group of intervals of 5 has relatively similar frequencies in our data set, and there is no outlying skew to the age.
+
+Sex: This variable measures the patient's sex assigned at birth.
+: Data Type: categorical
+: Range/Levels: "male", "female"
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+table(insurance$sex)
+prop.table(table(insurance$sex))
+```
+The table shows the number of females and males in our data set, along with their proportions.
+
+BMI: This variable measures the patient's BMI.
+: Data Type: numeric
+: Range/Levels: 15.96-53.13
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+data <- insurance$bmi
+hist_data <- hist(insurance$bmi, main = "Distribution of Patient BMI", breaks = 30, xlab = "BMI")
+x_values <- seq(min(data), max(data), length = 100)
+y_values <- dnorm(x_values, mean = mean(data), sd = sd(data)) 
+y_values <- y_values * diff(hist_data$mids[1:2]) * length(data) 
+
+#overlay normal curve on histogram
+lines(x_values, y_values, lwd = 2)
+
+```
+Patient BMI levels follow a normal distribution around BMI = 30. 
+
+Children: This variable measures how many children the patient has.
+: Data Type: numeric
+: Range/Levels: 0-5
+
+Smoker: This variable measures if the patient smokes.
+: Data Type: categorical
+: Range/Levels: "yes", "no"
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+table(insurance$smoker)
+prop.table(table(insurance$smoker))
+
+```
+About 20% of patients smoke. The CDC (link in "References" section) estimated in 2021 that 11.5% of Americans smoke. We can see a higher proportion of smokers are admitted as patients in hospitals.
+
+Region: This variable measures which region of continental USA the patient is located in.
+: Data Type: categorical
+: Range/Levels: "northeast", "northwest", "southeast", "southwest"
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+prop.table(table(insurance$region))
+range(insurance$charges)
+```
+The frequency of patients from all four regions is relatively the same, with the southeast region having slightly more patients than the other three regions.
+
+Charges: This is our predictor variable, which we will be using the other factors to estimate
+: Data Type: numerical
+: Range/Levels: 1121.874-63770.428
+
+Our Connecticut data is from publicly available government data found at https://catalog.data.gov/dataset/insurance-company-complaints-resolutions-status-and-recoveries. The variables include insurance company, file openning date, file closing date, coverage, reason for filing claim (and a more detailed subreason column), recovery amount to patient, and status of insurance covered. 
+
+Company: This variable measures the patient's insurance companies.
+: Data Type: categorical
+: Range/Levels: 1121.874-63770.428
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+range(connecticut$Company)
+```
+
+<!-- Describe where you obtained data from, what variables you used, their data types and distributions. Clearly describe what the variables measure. -->
+
+<!-- Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc. -->
 
 ## 3. Analysis.
 
@@ -107,10 +181,12 @@ In this section, you briefly summarize what you did and state the conclusions th
 
 This part is a list of links to the data set(s) you used. Also include links to any resources you used in your project, such as code examples that you adapted to your project or tutorials on analysis techniques that were an important part of your project. You do not have to list any resources from our course material or from R documentation.
 
-* https://rmarkdown.rstudio.com/lesson-3.html 
-* https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+* https://www.statology.org/overlay-normal-curve-histogram-in-r/
+* https://www.datacamp.com/tutorial/make-histogram-basic-r
 
+Academic References
 
+* https://www.cdc.gov/tobacco/data_statistics/fact_sheets/adult_data/cig_smoking/index.htm#:~:text=This%20means%20an%20estimated%2028.3,with%20a%20smoking%2Drelated%20disease.&text=Current%20smoking%20has%20declined%20from,every%20100%20adults)%20in%202021.
 
 
 
