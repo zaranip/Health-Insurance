@@ -14,6 +14,11 @@ output:
 library(knitr) # for rendering tables with the kable function.
 library(dplyr)
 library(ggplot2)
+library(NbClust)
+library(mclust)
+library(flexclust)
+library(cluster)
+library(fpc)
 
 insurance <- read.csv("insurance.csv")
 insurance <- na.omit(insurance)
@@ -87,7 +92,7 @@ Smoker: This variable measures if the patient smokes.
 ```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 table(insurance$smoker)
 prop.table(table(insurance$smoker))
-
+na.omit(connecticut)
 ```
 About 20% of patients smoke. The CDC (link in "References" section) estimated in 2021 that 11.5% of Americans smoke. We can see a higher proportion of smokers are admitted as patients in hospitals.
 
@@ -108,68 +113,161 @@ Our Connecticut data is from publicly available government data found at https:/
 
 Company: This variable measures the patient's insurance companies.
 : Data Type: categorical
-: Range/Levels: 1121.874-63770.428
+: Range/Levels: 753 companies/levels
 
 ```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
-range(connecticut$Company)
+connecticut$Company <- as.factor(connecticut$Company)
 ```
 
 <!-- Describe where you obtained data from, what variables you used, their data types and distributions. Clearly describe what the variables measure. -->
 
 <!-- Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc. -->
 
+Opened and Closed: These two variable measures when the patient file was opened and closed.
+: Data Type: numerical
+: Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year, hence why the value for Closed is empty.
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+range(connecticut$Closed)
+```
+Reason: This variable measures the reason for the insurance claim.
+: Data Type: categorical
+: Range/Levels: 5 levels: "", "Claim Handling", "Marketing & Sales", "PolicyHolder Service", and "Underwriting"
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+connecticut$Reason <- as.factor(connecticut$Reason)
+
+barplot(table(connecticut$Reason),las=2, cex.names=.5,)
+```
+Reason: This variable measures the reason for the insurance claim.
+: Data Type: categorical
+: Range/Levels: 176 levels. Examples include "Provider Availability" and "Service Fees".
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+connecticut$SubReason<- as.factor(connecticut$SubReason)
+
+```
+These subreasons are matched to a larger, more broad "Reason" tag.
+
+Conclusion: We are using this variable to see if the patient's claims were accepted by insurance companies.
+: Data Type: categorical
+: Range/Levels: 52 levels from "Accident in Another State" to "Voluntary Reconsideration"
+
+```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+connecticut$Conclusion <- as.factor(connecticut$Conclusion)
+
+```
+
 ## 3. Analysis.
 
-This is where you explain the methods you used to carry out the analysis to investigate the guiding question(s). State what techniques you used, what variables were included. Identify the independent and dependent variables. Did you preprocess the data? Include the results of any modeling and explain what they mean.
+<!-- This is where you explain the methods you used to carry out the analysis to investigate the guiding question(s). State what techniques you used, what variables were included. Identify the independent and dependent variables. Did you preprocess the data? Include the results of any modeling and explain what they mean. -->
 
-Code Chunks
-
-Examples of using R markdown and code chunks. See the links in the references section for more on using code chunk options to control rendering.
-
-Example of a code chunk that hides the code from being rendered:
-
-```{r echo=FALSE}
-my.vec <- runif(25, min = 0, max = 10) 
-```
-
-Create an example table and use kable to render it nicely:
-
-```{r echo=FALSE}
-example.table <- matrix(c(7, 5, 14, 19, 3, 2, 17, 6, 12), ncol=3, byrow=TRUE)
-colnames(example.table) <- c('colName1','colName2','colName3')
-rownames(example.table) <- c('rowName1','rowName2','rowName3')
-example.table <- as.table(example.table)
-
-kable(example.table, caption='The title that describes this table.')
-```
-
-Notice the table is automatically numbered.
-
-Rendering a barplot using the caption option:
+### Linear Regression Models
 
 ```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+mod<-lm(charges~., data=insurance)
+summary(mod)
+```
+Finding residuals and QQ plots for all factors
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+par(mfrow=c(1,2))
+hist(mod$residuals, prob = TRUE)
+lines(density(mod$residuals))
 
-counts <- table(mtcars$vs, mtcars$gear)
-my.plot<-barplot(counts, main="Car Distribution by Gears and VS",
-  xlab="Number of Gears", col=c("gray","gray43"),
-  ylim = c(0, max(counts) + 1),
-  legend = rownames(counts), beside=TRUE)
-text(x = my.plot, y = counts + 0.5, counts, cex = 0.8, col = "red")
+qqnorm(y=mod$residuals)
+qqline(y=mod$residuals, datax = FALSE)
+```
+
+
+Using only statistically significant factors: age, bmi, children, smoker (yes).
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
+summary(sigFac)
+```
+### Residual Plots
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+par(mfrow=c(1,2))
+hist(sigFac$residuals, prob = TRUE)
+lines(density(sigFac$residuals))
+
+qqnorm(y=sigFac$residuals)
+qqline(y=sigFac$residuals, datax = FALSE)
+```
+### Testing Correlation With Clustering
+Our previous model stated that age, bmi, children, smoker (yes) were all significant factors. We are now going to perform a clustering model to see if this still holds true.
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+seed.val<-1234
+
+insurance.scaled <- scale(insurance[1] + insurance[3]) 
+for(i in 1:ncol(insurance.scaled)){
+print(max(insurance.scaled[ , i]))
+}
+
+```
+```{r}
+RNGversion("4.1.2")
+set.seed(seed.val)
+
+
+clusterInsurance <- kmeans(insurance.scaled, 2, nstart = 25)
+```
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+clusterInsurance$size
+clusterInsurance$tot.withinss
+clusterInsurance$betweenss
+```
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+wssplot <- function(data, nc=15, seed=1234){
+               wss <- (nrow(data)-1)*sum(apply(data,2,var))
+               for (i in 2:nc){
+                    set.seed(seed)
+                    wss[i] <- sum(kmeans(data, centers=i)$withinss)}
+                plot(1:nc, wss, main = "Finding Optimal Number of Clusters using Within Group Sum of Squares", type="b", xlab="Number of Clusters",
+                     ylab="Within groups sum of squares")
+}
+
+wssplot(insurance.scaled)
+```
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+plotcluster(insurance.scaled, clusterInsurance$cluster)
+title("Graphical Representation of Clusters")
+```
+Commented out because of knitting issues. Returned k = 2 as optimal amount of clusters.
+
+#nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans")
+
+#table(nc$Best.n[1,])
+
+Optimal number of clusters using PAM
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+dist.mat<-daisy(insurance.scaled,  metric="euclidean")
+pk <- pamk(dist.mat, krange=2:15, usepam=TRUE, diss=TRUE)
+pk$nc
+```
+
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+fit.pam = pam(dist.mat,2)
+plot(fit.pam)
+
+jpeg("MYPLOT.jpg")
+plot(fit.pam)
+dev.off()
+```
+Chi-Squared Test
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+cont.table <- table(insurance$charges, clusterInsurance$cluster)
+print(chisq.test(cont.table))
+```
+How different are the clusters?
+```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+randIndex(cont.table)
 
 ```
 
-Adding another plot:
-
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.align = 'center', fig.cap = "Bar Plot Example ggplot2"}
-ggplot(mtcars, aes(x = factor(cyl))) +
-  geom_bar() +
-  geom_text(aes(label = after_stat(count)), vjust=-1, stat = "count") +
-  xlab('cylinders') 
-```
-
-Notice the plots are automatically numbered.
-
-Adding a page break:
 
 \newpage
 
