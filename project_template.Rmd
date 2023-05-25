@@ -53,7 +53,7 @@ Age: This variable measures the patient's age at the time of the hospital bill's
 : Data Type: numeric
 : Range/Levels: 24-80
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages', breaks = 15)
 
 ```
@@ -62,7 +62,7 @@ As we see from the graph above, each age group of intervals of 5 has relatively 
 Sex: This variable measures the patient's sex assigned at birth.
 : Data Type: categorical
 : Range/Levels: "male", "female"
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 table(insurance$sex)
 prop.table(table(insurance$sex))
 ```
@@ -72,7 +72,7 @@ BMI: This variable measures the patient's BMI.
 : Data Type: numeric
 : Range/Levels: 15.96-53.13
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 data <- insurance$bmi
 hist_data <- hist(insurance$bmi, main = "Distribution of Patient BMI", breaks = 30, xlab = "BMI")
 x_values <- seq(min(data), max(data), length = 100)
@@ -98,7 +98,7 @@ Smoker: This variable measures if the patient smokes.
 : Data Type: categorical
 : Range/Levels: "yes", "no"
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 table(insurance$smoker)
 prop.table(table(insurance$smoker))
 na.omit(connecticut)
@@ -108,7 +108,7 @@ About 20% of patients smoke. The CDC (link in "References" section) estimated in
 Region: This variable measures which region of continental USA the patient is located in.
 : Data Type: categorical
 : Range/Levels: "northeast", "northwest", "southeast", "southwest"
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 prop.table(table(insurance$region))
 range(insurance$charges)
 ```
@@ -124,7 +124,7 @@ Company: This variable measures the patient's insurance companies.
 : Data Type: categorical
 : Range/Levels: 753 companies/levels
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Company <- as.factor(connecticut$Company)
 ```
 
@@ -136,15 +136,17 @@ Opened and Closed: These two variables measure when the patient file was opened 
 : Data Type: numerical
 : Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year hence why the value for Closed is empty.
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 range(connecticut$Opened)
+connecticut$Opened <- as.Date(connecticut$Opened, "%m/%d/%Y")
 range(connecticut$Closed)
+connecticut$Closed <- as.Date(connecticut$Closed,"%m/%d/%Y")
 ```
 Reason: This variable measures the reason for the insurance claim.
 : Data Type: categorical
 : Range/Levels: 5 levels: "", "Claim Handling", "Marketing & Sales", "PolicyHolder Service", and "Underwriting"
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Reason <- as.factor(connecticut$Reason)
 
 barplot(table(connecticut$Reason),las=2, cex.names=.5,)
@@ -153,7 +155,7 @@ SubReason: This variable is a more in depth reason of a blanket reason.
 : Data Type: categorical
 : Range/Levels: 176 levels. Examples include "Provider Availability" and "Service Fees".
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$SubReason<- as.factor(connecticut$SubReason)
 
 ```
@@ -163,7 +165,7 @@ Conclusion: We are using this variable to see if the patient's claims were accep
 : Data Type: categorical
 : Range/Levels: 52 levels from "Accident in Another State" to "Voluntary Reconsideration"
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Conclusion <- as.factor(connecticut$Conclusion)
 
 ```
@@ -177,7 +179,7 @@ In order to identify which variables are statistically significant and which var
 We used a linear regression model to evaluate which variables are statistically significant with respect to the "charged" variable. We tested all variables against the charged variable and the results show that the age, bmi, children, and smokeryes variables are the statistically significant ones. This result allows us to conclude that these variables are the ones that affect the "charged" variable the most. 
 We can also conclude that about 75% of the variance is explained by this regression model.
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 mod<-lm(charges~., data=insurance)
 summary(mod)
 ```
@@ -186,7 +188,7 @@ summary(mod)
 The histogram of the residuals is used to check whether the variance is normally distributed. The symmetric, bell-shaped curve histogram around zero shows that the normality distribution is likely to be assumed. This also lets us know that there aren't many observations that are skewed to either side and that the data is evenly distributed. 
 The QQ plot gives us a visual representation of the distribution of the error points. It tells us whether or not a data set came from a theoretical distribution. If the fit is accurate, the error points should be evenly distributed around 0, and our QQ plot below shows the error points normally distributed with a mean of 0. Even though there is a  slight deviation in the QQ plot, we can ignore this since the data set is very large and may havve some discrepancies. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 par(mfrow=c(1,2))
 hist(mod$residuals, prob = TRUE)
 lines(density(mod$residuals))
@@ -199,7 +201,7 @@ qqline(y=mod$residuals, datax = FALSE)
 
 Using only the statistically significant variables allows us to further interpret which variables provide the biggest effect to the "charged" variable. Using the linear regression model again, we can check the statistic significance for these variables and see how much of the variance is explained by the model. The results obtained from this linear regression model show that all variables are extremely significant with a p-value < 0.001, and about 75% of the variance is explained by the model. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
 summary(sigFac)
 ```
@@ -207,7 +209,7 @@ summary(sigFac)
 
 The following residual plots provide us with information about the error terms for the significant variables determined from the previous model. We can see from  both plots that the error terms are normally distributed with a mean of 0, which indicates that we can assume normal distribution for the data set. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 par(mfrow=c(1,2))
 hist(sigFac$residuals, prob = TRUE)
 lines(density(sigFac$residuals))
@@ -220,7 +222,7 @@ Our previous model stated that age, bmi, children, smoker (yes) were all signifi
 
 The following code chunk gives us the max scaled age value.
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 seed.val<-1234
 
 insurance.scaled <- scale(insurance[1] + insurance[3]) 
@@ -229,7 +231,7 @@ print(max(insurance.scaled[ , i]))
 }
 
 ```
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 RNGversion("4.1.2")
 set.seed(seed.val)
 
@@ -238,15 +240,16 @@ clusterInsurance <- kmeans(insurance.scaled, 2, nstart = 25)
 ```
 
 From the output obtained below, we can see that two clusters were developed. The size of each cluster falls in the 600 range and we also computed the within clusters sum of squared distances and between clusters sum of squared distances. 
+
 The within clusters distances is smaller than the between clusters distances, which is the desired output. Since the sum os squared distances within clusters is smaller than between clusters, this shows that the data within clusters is tightly grouped and very similar to each other. A larger between clusters value shows that data from different clusters differ a lot from other clusters and shows high variability in the observations. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 clusterInsurance$size
 clusterInsurance$tot.withinss
 clusterInsurance$betweenss
 ```
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 wssplot <- function(data, nc=15, seed=1234){
                wss <- (nrow(data)-1)*sum(apply(data,2,var))
                for (i in 2:nc){
@@ -260,7 +263,7 @@ wssplot(insurance.scaled)
 ```
 The plot above shows the optimal number of clusters formed using the within group sum of squared differences. The steep drop at 2 clusters indicates that 2 clusters is the optimal number of clusters. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 plotcluster(insurance.scaled, clusterInsurance$cluster)
 title("Graphical Representation of Clusters")
 ```
@@ -276,14 +279,14 @@ The NBClust function was not included due to knitting issues. Returned k = 2 as 
 
 We identified the optimal number of clusters using k-means and concluded that 2 clusters was the optimal number. However using just one clustering method is not always reliable, so we used PAM to corroborate the optimal number of clusters. The result indicates that the optimal number of clusters is 2.  
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 dist.mat<-daisy(insurance.scaled,  metric="euclidean")
 pk <- pamk(dist.mat, krange=2:15, usepam=TRUE, diss=TRUE)
 pk$nc
 ```
 The plots generated below show a silhouette plot and the optimal number of clusters with the number of data points in each plot. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 fit.pam = pam(dist.mat,2)
 plot(fit.pam)
 
@@ -295,7 +298,7 @@ dev.off()
 
 The chi-squared test performed below tells us the relation between the "charges" variable in the insurance.df and the 2 clusters created. The p-value tells us the statistical significance between these two conditions. The results obtained below are a perfect example of data that isn't exactly desired. We can see that the p-value is greater than 0.05 so it may not be statistically significant. However our models use real data and this may hint at a correlational relationship between the two variables. A p-value less than 0.7 for real data can still be considered to hint at some sort of relationship. A reason for this extremely weak correlation can be due to the fact that there are many variables that are statistically significant. Since there isn't a single strong correlation between "charged" and another variable, it might have been difficult to obtain clusters that gave a strong statistical significance in the chi-square test. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 cont.table <- table(insurance$charges, clusterInsurance$cluster)
 print(chisq.test(cont.table))
 ```
@@ -303,7 +306,7 @@ print(chisq.test(cont.table))
 
 As we saw from the chi-square test results above, there isn't a very strong statistical significance between the "charged" variable and the clusters. This shows that the clusters may be very different to each other. Another way we can visualize this assumption is by calculating the randIndex. A value close to 1 shows that the sets are the same and a value closer to -1 means they are different. The value obtained from the code below shows a value that is extremely far from 1. This shows that the sets may be very different from each other. 
 
-```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 randIndex(cont.table)
 
 ```
@@ -311,13 +314,38 @@ randIndex(cont.table)
 
 \newpage
 ##Connecticut Data Exploration
-As described in the first section, we want to use the open and closing time, coverage, and reason (with their respective subcategories, to draw a conclusion with the "Conclusion" variable.
+As described in the first section, we want to use the open and closing time and reason (with its respective subcategories), to draw a conclusion with the "Conclusion" variable.
 
-###Open and Closing Time Compared
+###Open and Closing Time Distribution
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+connecticut$TimeElapsed <- as.numeric(connecticut$Closed - connecticut$Opened)
+
+hist(connecticut$TimeElapsed, main = "Distribution of Time from Opening to Closing in Connecticut in 2022", breaks = 50, xlim = c(0,500), xlab = "Time Elapsed (in Days)")
+```
+As we see from the histogram, most cases are closed in 50 days or less. The great majority of cases are closed before 100 days, with values tapering off after 100 days.
+
+Which "Reasons" had the shortest time elapsed?
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+reasons <- table(connecticut$Reason, connecticut$TimeElapsed<50)
+prop.table(reasons)
+reasons
+```
+Claim Handling was responsible for the largest proportion (56.41%) of all cases that were closed in less than 50 days. This makes sense as Claim Handling has the largest amount of cases in general. On a percentage basis, this is larger than the other categories. On the other hand, uncategorized reasons and "Marketing & Sales" had the highest proportion of cases closed in greater than 50 days.
+
+What about exploring by subreason?
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+subreasons <- table(connecticut$SubReason, connecticut$TimeElapsed<50)
+head(subreasons)
+```
+Due to the large amount of data, we found that sorting by subreason was not useful. In insurance cases, there are many other factors besides "reasons" which may impact the results.
 
 ## Summary and Conclusions.
 
 Our project focuses on identifying certain variables that affect the rate at which people will get charged for their insurance plan. We obtained a data set which contained the demographics for individuals and we created a variety of models to identify which variables are significant in determining the rate charged for specific insurance plans. Certain modelling techniques such as linear regression models and residual plots allowed us to clearly identify which variables are statistically significant in finding out what affects the "charged" variable. However the results we obtained from clustering may not be as desirable since our data set is extremely large and there may be many other external factors not included in the data set that affect the rate at which people get charged for their insurance plan. Our chi-square test outputted a result that is difficult to interpret, but overall we can say that certain factors such as age, bmi, children, and smoking status may affect the rate charged for insurance plans for individuals. 
+
+Through our Connecticut data, we were able to compare TimeElapsed to reasons for filing claims. We found that while most cases were solved in less than 50 days, a large proportion of these cases fell under the "Claim Handling" category. The other categories had a much smaller proportion of cases solved within 50 days. We also wanted to see if certain subreasons would have longer wait times. However, our results were messy and we were unable to draw anything conclusive. 
+
+Further research should focus on more specific areas - such as company. Because of company policies, we believe there may be inconsistencies in time taken to resolve a claim conflict.
 
 <!-- In this section, you briefly summarize what you did and state the conclusions that you have determined based on the results of what you did in the analysis part above. This should be a single paragraph. It is important to clearly state what you conclude about your results. Point out any possible problems that you that may have an effect on your conclusions. For example, small data size, lot of missing values, suspected -->
 
@@ -331,23 +359,4 @@ Our project focuses on identifying certain variables that affect the rate at whi
 Academic References
 
 * https://www.cdc.gov/tobacco/data_statistics/fact_sheets/adult_data/cig_smoking/index.htm#:~:text=This%20means%20an%20estimated%2028.3,with%20a%20smoking%2Drelated%20disease.&text=Current%20smoking%20has%20declined%20from,every%20100%20adults)%20in%202021.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
