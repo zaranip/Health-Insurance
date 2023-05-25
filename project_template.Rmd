@@ -43,6 +43,7 @@ We additionally wanted to make a more comprehensive report of additional Connect
 
 Our domain spans finance, because of the insurance component; healthcare; and demographics, including sex, age, and number of children.
 \newpage
+
 ## 2. Data and Resources Used.
 
 Our main data set is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/insurance). We initially were unsure of which variables were significant or not, hence our approach to take all factors into account (age, sex, bmi, children, smoker status, region) and finding which ones were statistically significant. The variables are described below.
@@ -60,6 +61,8 @@ hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages'
 ```
 As we see from the graph above, each age group of intervals of 5 has relatively similar frequencies in our data set, and there is no outlying skew to the age.
 
+
+
 **Sex**: This variable measures the patient's sex assigned at birth.
 
 Data Type: categorical
@@ -69,6 +72,8 @@ table(insurance$sex)
 prop.table(table(insurance$sex))
 ```
 The table shows the number of females and males in our data set, along with their proportions.
+
+
 
 **BMI**: This variable measures the patient's BMI.
 
@@ -88,6 +93,8 @@ lines(x_values, y_values, lwd = 2)
 ```
 Patient BMI levels follow a normal distribution around BMI = 30. 
 
+
+
 **Children**: This variable measures how many children the patient has.
 
 Data Type: numeric
@@ -97,6 +104,8 @@ Range/Levels: 0-5
 table(insurance$children)
 prop.table(table(insurance$children))
 ```
+
+
 
 **Smoker**: This variable measures if the patient smokes.
 
@@ -110,6 +119,8 @@ na.omit(connecticut)
 ```
 About 20% of patients smoke. The CDC (link in "References" section) estimated in 2021 that 11.5% of Americans smoke. We can see a higher proportion of smokers are admitted as patients in hospitals.
 
+
+
 **Region**: This variable measures which region of continental USA the patient is located in.
 
 Data Type: categorical
@@ -120,12 +131,16 @@ range(insurance$charges)
 ```
 The frequency of patients from all four regions is relatively the same, with the southeast region having slightly more patients than the other three regions.
 
+
+
 **Charges**: This is our predictor variable, which we will be using the other factors to estimate.
 
 Data Type: numerical
 Range/Levels: 1121.874-63770.428
 
 Our Connecticut data is from publicly available government data found at https://catalog.data.gov/dataset/insurance-company-complaints-resolutions-status-and-recoveries. The variables include insurance company, file opening date, file closing date, coverage, reason for filing claim (and a more detailed sub-reason column), recovery amount to patient, and status of insurance covered. 
+
+
 
 **Company**: This variable measures the patient's insurance companies.
 
@@ -136,9 +151,7 @@ Range/Levels: 753 companies/levels
 connecticut$Company <- as.factor(connecticut$Company)
 ```
 
-<!-- Describe where you obtained data from, what variables you used, their data types and distributions. Clearly describe what the variables measure. -->
 
-<!-- Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc. -->
 
 **Opened and Closed**: These two variables measure when the patient file was opened and closed.
 
@@ -151,6 +164,9 @@ connecticut$Opened <- as.Date(connecticut$Opened, "%m/%d/%Y")
 range(connecticut$Closed)
 connecticut$Closed <- as.Date(connecticut$Closed,"%m/%d/%Y")
 ```
+
+
+
 **Reason**: This variable measures the reason for the insurance claim.
 
 Data Type: categorical
@@ -161,6 +177,9 @@ connecticut$Reason <- as.factor(connecticut$Reason)
 
 barplot(table(connecticut$Reason),las=2, cex.names=.5,)
 ```
+
+
+
 **SubReason**: This variable is a more in depth reason of a blanket reason.
 
 Data Type: categorical
@@ -172,6 +191,8 @@ connecticut$SubReason<- as.factor(connecticut$SubReason)
 ```
 These subreasons are matched to a larger more broad "Reason" tag.
 
+
+
 **Conclusion**: We are using this variable to see if the patient's claims were accepted by insurance companies.
 
 Data Type: categorical
@@ -182,6 +203,7 @@ connecticut$Conclusion <- as.factor(connecticut$Conclusion)
 
 ```
 \newpage
+
 ## 3. Analysis.
 
 In order to identify which variables are statistically significant and which variables provide the best explanations as to what effects how much a person is charged for insurance, we used a variety of techniques to analyze the variables. Below each analysis technique is a brief explanation of the results and analysis process.
@@ -330,7 +352,9 @@ randIndex(cont.table)
 
 
 \newpage
-##Connecticut Data Exploration
+
+## Connecticut Data Exploration
+
 As described in the first section, we want to use the open and closing time and reason (with its respective subcategories), to draw a conclusion with the "Conclusion" variable.
 
 ### Open and Closing Time Distribution
