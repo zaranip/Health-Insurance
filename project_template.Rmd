@@ -1,17 +1,15 @@
 ---
 title: "Predicting Health Insurance Costs in the United States Using Patient Medical History"
 author: "Zara Nip and Nehal Linganur"
-date: "05/05/2023"
+date: "05/25/2023"
 output:
   pdf_document: default
   html_document:
     df_print: paged
 ---
 
-```{r, echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
-# library load statements here- remember, no install statements.
-# some useful libraries you may find useful:
-library(knitr) # for rendering tables with the kable function.
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+library(knitr) 
 library(dplyr)
 library(ggplot2)
 library(NbClust)
@@ -19,7 +17,10 @@ library(mclust)
 library(flexclust)
 library(cluster)
 library(fpc)
+```
 
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
+#Cleaning data
 insurance <- read.csv("insurance.csv")
 insurance <- na.omit(insurance)
 insurance$age <- as.numeric(insurance$age)
@@ -28,7 +29,10 @@ insurance$sex <- as.factor(insurance$sex)
 insurance$smoker <- as.factor(insurance$smoker)
 insurance$region <- as.factor(insurance$region)
 
+#Creating the Connecticut dataset 
 connecticut <- read.csv("Insurance_Company_Complaints__Resolutions__Status__and_Recoveries.csv")
+na.omit(connecticut)
+#For clarity, type conversion is expressed below the variable is explained due to some variables not being used.
 ```
 
 ## 1. Project Overview. 
@@ -45,11 +49,11 @@ Our main data set is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/i
 
 All empty rows were preeminently ommitted. There was no other data cleaning involved.
 
-Age: This variable measures the patient's age at the time of the hospital bill's creation.
+Age: This variable measures the patient's age at the time of the hospital bill's creation.\
 : Data Type: numeric
 : Range/Levels: 24-80
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages', breaks = 15)
 
 ```
@@ -58,7 +62,7 @@ As we see from the graph above, each age group of intervals of 5 has relatively 
 Sex: This variable measures the patient's sex assigned at birth.
 : Data Type: categorical
 : Range/Levels: "male", "female"
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 table(insurance$sex)
 prop.table(table(insurance$sex))
 ```
@@ -68,7 +72,7 @@ BMI: This variable measures the patient's BMI.
 : Data Type: numeric
 : Range/Levels: 15.96-53.13
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 data <- insurance$bmi
 hist_data <- hist(insurance$bmi, main = "Distribution of Patient BMI", breaks = 30, xlab = "BMI")
 x_values <- seq(min(data), max(data), length = 100)
@@ -94,7 +98,7 @@ Smoker: This variable measures if the patient smokes.
 : Data Type: categorical
 : Range/Levels: "yes", "no"
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 table(insurance$smoker)
 prop.table(table(insurance$smoker))
 na.omit(connecticut)
@@ -104,7 +108,7 @@ About 20% of patients smoke. The CDC (link in "References" section) estimated in
 Region: This variable measures which region of continental USA the patient is located in.
 : Data Type: categorical
 : Range/Levels: "northeast", "northwest", "southeast", "southwest"
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 prop.table(table(insurance$region))
 range(insurance$charges)
 ```
@@ -120,7 +124,7 @@ Company: This variable measures the patient's insurance companies.
 : Data Type: categorical
 : Range/Levels: 753 companies/levels
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 connecticut$Company <- as.factor(connecticut$Company)
 ```
 
@@ -130,9 +134,9 @@ connecticut$Company <- as.factor(connecticut$Company)
 
 Opened and Closed: These two variables measure when the patient file was opened and closed.
 : Data Type: numerical
-: Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year, hence why the value for Closed is empty.
+: Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year hence why the value for Closed is empty.
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 range(connecticut$Opened)
 range(connecticut$Closed)
 ```
@@ -140,26 +144,26 @@ Reason: This variable measures the reason for the insurance claim.
 : Data Type: categorical
 : Range/Levels: 5 levels: "", "Claim Handling", "Marketing & Sales", "PolicyHolder Service", and "Underwriting"
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 connecticut$Reason <- as.factor(connecticut$Reason)
 
 barplot(table(connecticut$Reason),las=2, cex.names=.5,)
 ```
-Reason: This variable measures the reason for the insurance claim.
+SubReason: This variable is a more in depth reason of a blanket reason.
 : Data Type: categorical
 : Range/Levels: 176 levels. Examples include "Provider Availability" and "Service Fees".
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 connecticut$SubReason<- as.factor(connecticut$SubReason)
 
 ```
-These subreasons are matched to a larger, more broad "Reason" tag.
+These subreasons are matched to a larger more broad "Reason" tag.
 
 Conclusion: We are using this variable to see if the patient's claims were accepted by insurance companies.
 : Data Type: categorical
 : Range/Levels: 52 levels from "Accident in Another State" to "Voluntary Reconsideration"
 
-```{r, echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 connecticut$Conclusion <- as.factor(connecticut$Conclusion)
 
 ```
@@ -173,16 +177,16 @@ In order to identify which variables are statistically significant and which var
 We used a linear regression model to evaluate which variables are statistically significant with respect to the "charged" variable. We tested all variables against the charged variable and the results show that the age, bmi, children, and smokeryes variables are the statistically significant ones. This result allows us to conclude that these variables are the ones that affect the "charged" variable the most. 
 We can also conclude that about 75% of the variance is explained by this regression model.
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 mod<-lm(charges~., data=insurance)
 summary(mod)
 ```
-##Finding residuals and QQ plots for all factors
+###Finding residuals and QQ plots for all factors
 
 The histogram of the residuals is used to check whether the variance is normally distributed. The symmetric, bell-shaped curve histogram around zero shows that the normality distribution is likely to be assumed. This also lets us know that there aren't many observations that are skewed to either side and that the data is evenly distributed. 
 The QQ plot gives us a visual representation of the distribution of the error points. It tells us whether or not a data set came from a theoretical distribution. If the fit is accurate, the error points should be evenly distributed around 0, and our QQ plot below shows the error points normally distributed with a mean of 0. Even though there is a  slight deviation in the QQ plot, we can ignore this since the data set is very large and may havve some discrepancies. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 par(mfrow=c(1,2))
 hist(mod$residuals, prob = TRUE)
 lines(density(mod$residuals))
@@ -191,11 +195,11 @@ qqnorm(y=mod$residuals)
 qqline(y=mod$residuals, datax = FALSE)
 ```
 
-##Using only statistically significant factors: age, bmi, children, smoker (yes).
+###Using only statistically significant factors: age, bmi, children, smoker (yes).
 
 Using only the statistically significant variables allows us to further interpret which variables provide the biggest effect to the "charged" variable. Using the linear regression model again, we can check the statistic significance for these variables and see how much of the variance is explained by the model. The results obtained from this linear regression model show that all variables are extremely significant with a p-value < 0.001, and about 75% of the variance is explained by the model. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
 summary(sigFac)
 ```
@@ -203,7 +207,7 @@ summary(sigFac)
 
 The following residual plots provide us with information about the error terms for the significant variables determined from the previous model. We can see from  both plots that the error terms are normally distributed with a mean of 0, which indicates that we can assume normal distribution for the data set. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 par(mfrow=c(1,2))
 hist(sigFac$residuals, prob = TRUE)
 lines(density(sigFac$residuals))
@@ -216,7 +220,7 @@ Our previous model stated that age, bmi, children, smoker (yes) were all signifi
 
 The following code chunk gives us the max scaled age value.
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 seed.val<-1234
 
 insurance.scaled <- scale(insurance[1] + insurance[3]) 
@@ -225,7 +229,7 @@ print(max(insurance.scaled[ , i]))
 }
 
 ```
-```{r}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 RNGversion("4.1.2")
 set.seed(seed.val)
 
@@ -236,13 +240,13 @@ clusterInsurance <- kmeans(insurance.scaled, 2, nstart = 25)
 From the output obtained below, we can see that two clusters were developed. The size of each cluster falls in the 600 range and we also computed the within clusters sum of squared distances and between clusters sum of squared distances. 
 The within clusters distances is smaller than the between clusters distances, which is the desired output. Since the sum os squared distances within clusters is smaller than between clusters, this shows that the data within clusters is tightly grouped and very similar to each other. A larger between clusters value shows that data from different clusters differ a lot from other clusters and shows high variability in the observations. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 clusterInsurance$size
 clusterInsurance$tot.withinss
 clusterInsurance$betweenss
 ```
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 wssplot <- function(data, nc=15, seed=1234){
                wss <- (nrow(data)-1)*sum(apply(data,2,var))
                for (i in 2:nc){
@@ -256,30 +260,30 @@ wssplot(insurance.scaled)
 ```
 The plot above shows the optimal number of clusters formed using the within group sum of squared differences. The steep drop at 2 clusters indicates that 2 clusters is the optimal number of clusters. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 plotcluster(insurance.scaled, clusterInsurance$cluster)
 title("Graphical Representation of Clusters")
 ```
 The above plot shows the distribution of the 2 clusters.
 
-Commented out because of knitting issues. Returned k = 2 as optimal amount of clusters.
+The NBClust function was not included due to knitting issues. Returned k = 2 as optimal amount of clusters.
 
-#nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans")
+<!-- nc <- NbClust(insurance.scaled, min.nc=2, max.nc=15, method="kmeans") -->
 
-#table(nc$Best.n[1,])
+<!-- #table(nc$Best.n[1,]) -->
 
-##Optimal number of clusters using PAM
+###Optimal number of clusters using PAM
 
-We identified the optimal number of clusters using k-means and concluded that 2 clusters was the optimal number. However, using just one clustering method is not always reliable, so we used PAM to corroborate the optimal number of clusters. The result indicates that the optimal number of clusters is 2.  
+We identified the optimal number of clusters using k-means and concluded that 2 clusters was the optimal number. However using just one clustering method is not always reliable, so we used PAM to corroborate the optimal number of clusters. The result indicates that the optimal number of clusters is 2.  
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 dist.mat<-daisy(insurance.scaled,  metric="euclidean")
 pk <- pamk(dist.mat, krange=2:15, usepam=TRUE, diss=TRUE)
 pk$nc
 ```
 The plots generated below show a silhouette plot and the optimal number of clusters with the number of data points in each plot. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 fit.pam = pam(dist.mat,2)
 plot(fit.pam)
 
@@ -287,29 +291,33 @@ jpeg("MYPLOT.jpg")
 plot(fit.pam)
 dev.off()
 ```
-##Chi-Squared Test
+###Chi-Squared Test
 
-The chi-squared test performed below tells us the relation between the "charges" variable in the insurance.df and the 2 clusters created. The p-value tells us the statistical significance between these two conditions. The results obtained below are a perfect example of data that isn't exactly desired. We can see that the p-value is greater than 0.05 so it may not be statistically significant. However, our models use real data and this may hint at a correlational relationship between the two variables. A p-value less than 0.7 for real data can still be considered to hint at some sort of relationship. A reason for this extremely weak correlation can be due to the fact that there are many variables that are statistically significant. Since there isn't a single strong correlation between "charged" and another variable, it might have been difficult to obtain clusters that gave a strong statistical significance in the chi-square test. 
+The chi-squared test performed below tells us the relation between the "charges" variable in the insurance.df and the 2 clusters created. The p-value tells us the statistical significance between these two conditions. The results obtained below are a perfect example of data that isn't exactly desired. We can see that the p-value is greater than 0.05 so it may not be statistically significant. However our models use real data and this may hint at a correlational relationship between the two variables. A p-value less than 0.7 for real data can still be considered to hint at some sort of relationship. A reason for this extremely weak correlation can be due to the fact that there are many variables that are statistically significant. Since there isn't a single strong correlation between "charged" and another variable, it might have been difficult to obtain clusters that gave a strong statistical significance in the chi-square test. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 cont.table <- table(insurance$charges, clusterInsurance$cluster)
 print(chisq.test(cont.table))
 ```
-## How different are the clusters?
+### How different are the clusters?
 
 As we saw from the chi-square test results above, there isn't a very strong statistical significance between the "charged" variable and the clusters. This shows that the clusters may be very different to each other. Another way we can visualize this assumption is by calculating the randIndex. A value close to 1 shows that the sets are the same and a value closer to -1 means they are different. The value obtained from the code below shows a value that is extremely far from 1. This shows that the sets may be very different from each other. 
 
-```{r echo=FALSE, out.width="75%", out.height="75%", fig.cap = "Bar Plot Example base R", fig.align = 'center'}
+```{r echo=FALSE, message = FALSE, results = TRUE, warning=FALSE}
 randIndex(cont.table)
 
 ```
 
 
 \newpage
+##Connecticut Data Exploration
+As described in the first section, we want to use the open and closing time, coverage, and reason (with their respective subcategories, to draw a conclusion with the "Conclusion" variable.
+
+###Open and Closing Time Compared
 
 ## Summary and Conclusions.
 
-Our project focuses on identifying certain variables that affect the rate at which people will get charged for their insurance plan. We obtained a data set which contained the demographics for individuals and we created a variety of models to identify which variables are significant in determining the rate charged for specific insurance plans. Certain modelling techniques such as linear regression models and residual plots allowed us to clearly identify which variables are statistically significant in finding out what affects the "charged" variable. However, the results we obtained from clustering may not be as desirable since our data set is extremely large and there may be many other external factors not included in the data set that affect the rate at which people get charged for their insurance plan. Our chi-square test outputted a result that is difficult to interpret, but overall we can say that certain factors such as age, bmi, children, and smoking status may affect the rate charged for insurance plans for individuals. 
+Our project focuses on identifying certain variables that affect the rate at which people will get charged for their insurance plan. We obtained a data set which contained the demographics for individuals and we created a variety of models to identify which variables are significant in determining the rate charged for specific insurance plans. Certain modelling techniques such as linear regression models and residual plots allowed us to clearly identify which variables are statistically significant in finding out what affects the "charged" variable. However the results we obtained from clustering may not be as desirable since our data set is extremely large and there may be many other external factors not included in the data set that affect the rate at which people get charged for their insurance plan. Our chi-square test outputted a result that is difficult to interpret, but overall we can say that certain factors such as age, bmi, children, and smoking status may affect the rate charged for insurance plans for individuals. 
 
 <!-- In this section, you briefly summarize what you did and state the conclusions that you have determined based on the results of what you did in the analysis part above. This should be a single paragraph. It is important to clearly state what you conclude about your results. Point out any possible problems that you that may have an effect on your conclusions. For example, small data size, lot of missing values, suspected -->
 
