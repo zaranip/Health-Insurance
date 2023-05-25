@@ -42,16 +42,17 @@ Which factors impact an individual’s health insurance premium the most? Which 
 We additionally wanted to make a more comprehensive report of additional Connecticut data, given the first data set covers very broad regions and has already been cleaned up. Because the Connecticut data is publicly available, most information about the patients themselves are omitted. Instead of factors going into a patient's insurance cost, we are interested in the correlation between "reason" and "sub-reason" for insurance companies covering certain costs. Additional material includes how long the ticket was opened and when it was closed.
 
 Our domain spans finance, because of the insurance component; healthcare; and demographics, including sex, age, and number of children.
-
+\newpage
 ## 2. Data and Resources Used.
 
 Our main data set is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/insurance). We initially were unsure of which variables were significant or not, hence our approach to take all factors into account (age, sex, bmi, children, smoker status, region) and finding which ones were statistically significant. The variables are described below.
 
 All empty rows were preeminently ommitted. There was no other data cleaning involved.
 
-Age: This variable measures the patient's age at the time of the hospital bill's creation.\
-: Data Type: numeric
-: Range/Levels: 24-80
+**Age**: This variable measures the patient's age at the time of the hospital bill's creation.
+
+Data Type: numeric
+Range/Levels: 24-80
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages', breaks = 15)
@@ -59,18 +60,20 @@ hist(insurance$age, xlab = 'Age Brackets', main = 'Distribution of Patient Ages'
 ```
 As we see from the graph above, each age group of intervals of 5 has relatively similar frequencies in our data set, and there is no outlying skew to the age.
 
-Sex: This variable measures the patient's sex assigned at birth.
-: Data Type: categorical
-: Range/Levels: "male", "female"
+**Sex**: This variable measures the patient's sex assigned at birth.
+
+Data Type: categorical
+Range/Levels: "male", "female"
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 table(insurance$sex)
 prop.table(table(insurance$sex))
 ```
 The table shows the number of females and males in our data set, along with their proportions.
 
-BMI: This variable measures the patient's BMI.
-: Data Type: numeric
-: Range/Levels: 15.96-53.13
+**BMI**: This variable measures the patient's BMI.
+
+Data Type: numeric
+Range/Levels: 15.96-53.13
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 data <- insurance$bmi
@@ -85,18 +88,20 @@ lines(x_values, y_values, lwd = 2)
 ```
 Patient BMI levels follow a normal distribution around BMI = 30. 
 
-Children: This variable measures how many children the patient has.
-: Data Type: numeric
-: Range/Levels: 0-5
+**Children**: This variable measures how many children the patient has.
 
-```{r}
+Data Type: numeric
+Range/Levels: 0-5
+
+```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 table(insurance$children)
 prop.table(table(insurance$children))
 ```
 
-Smoker: This variable measures if the patient smokes.
-: Data Type: categorical
-: Range/Levels: "yes", "no"
+**Smoker**: This variable measures if the patient smokes.
+
+Data Type: categorical
+Range/Levels: "yes", "no"
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 table(insurance$smoker)
@@ -105,24 +110,27 @@ na.omit(connecticut)
 ```
 About 20% of patients smoke. The CDC (link in "References" section) estimated in 2021 that 11.5% of Americans smoke. We can see a higher proportion of smokers are admitted as patients in hospitals.
 
-Region: This variable measures which region of continental USA the patient is located in.
-: Data Type: categorical
-: Range/Levels: "northeast", "northwest", "southeast", "southwest"
+**Region**: This variable measures which region of continental USA the patient is located in.
+
+Data Type: categorical
+Range/Levels: "northeast", "northwest", "southeast", "southwest"
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 prop.table(table(insurance$region))
 range(insurance$charges)
 ```
 The frequency of patients from all four regions is relatively the same, with the southeast region having slightly more patients than the other three regions.
 
-Charges: This is our predictor variable, which we will be using the other factors to estimate
-: Data Type: numerical
-: Range/Levels: 1121.874-63770.428
+**Charges**: This is our predictor variable, which we will be using the other factors to estimate.
+
+Data Type: numerical
+Range/Levels: 1121.874-63770.428
 
 Our Connecticut data is from publicly available government data found at https://catalog.data.gov/dataset/insurance-company-complaints-resolutions-status-and-recoveries. The variables include insurance company, file opening date, file closing date, coverage, reason for filing claim (and a more detailed sub-reason column), recovery amount to patient, and status of insurance covered. 
 
-Company: This variable measures the patient's insurance companies.
-: Data Type: categorical
-: Range/Levels: 753 companies/levels
+**Company**: This variable measures the patient's insurance companies.
+
+Data Type: categorical
+Range/Levels: 753 companies/levels
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Company <- as.factor(connecticut$Company)
@@ -132,9 +140,10 @@ connecticut$Company <- as.factor(connecticut$Company)
 
 <!-- Include plots and tables to show the ranges and distributions of the important variables- you don’t necessarily have to do this for all variables, just the important ones. Do not display a raw summary of the entire dataset (data dump). Mention any modifications to the data (cleaning). Links to data sources go in the References section at the end of the doc. -->
 
-Opened and Closed: These two variables measure when the patient file was opened and closed.
-: Data Type: numerical
-: Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year hence why the value for Closed is empty.
+**Opened and Closed**: These two variables measure when the patient file was opened and closed.
+
+Data Type: numerical
+Range/Levels: Date Opened (01/01/2022 - 12/31/2022) and Date Closed ("" - 12/30/2022). Some cases were not closed by the end of the year hence why the value for Closed is empty.
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 range(connecticut$Opened)
@@ -142,18 +151,20 @@ connecticut$Opened <- as.Date(connecticut$Opened, "%m/%d/%Y")
 range(connecticut$Closed)
 connecticut$Closed <- as.Date(connecticut$Closed,"%m/%d/%Y")
 ```
-Reason: This variable measures the reason for the insurance claim.
-: Data Type: categorical
-: Range/Levels: 5 levels: "", "Claim Handling", "Marketing & Sales", "PolicyHolder Service", and "Underwriting"
+**Reason**: This variable measures the reason for the insurance claim.
+
+Data Type: categorical
+Range/Levels: 5 levels"", "Claim Handling", "Marketing & Sales", "PolicyHolder Service", and "Underwriting"
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Reason <- as.factor(connecticut$Reason)
 
 barplot(table(connecticut$Reason),las=2, cex.names=.5,)
 ```
-SubReason: This variable is a more in depth reason of a blanket reason.
-: Data Type: categorical
-: Range/Levels: 176 levels. Examples include "Provider Availability" and "Service Fees".
+**SubReason**: This variable is a more in depth reason of a blanket reason.
+
+Data Type: categorical
+Range/Levels: 176 levels. Examples include "Provider Availability" and "Service Fees".
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$SubReason<- as.factor(connecticut$SubReason)
@@ -161,20 +172,21 @@ connecticut$SubReason<- as.factor(connecticut$SubReason)
 ```
 These subreasons are matched to a larger more broad "Reason" tag.
 
-Conclusion: We are using this variable to see if the patient's claims were accepted by insurance companies.
-: Data Type: categorical
-: Range/Levels: 52 levels from "Accident in Another State" to "Voluntary Reconsideration"
+**Conclusion**: We are using this variable to see if the patient's claims were accepted by insurance companies.
+
+Data Type: categorical
+Range/Levels: 52 levels from "Accident in Another State" to "Voluntary Reconsideration"
 
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$Conclusion <- as.factor(connecticut$Conclusion)
 
 ```
-
+\newpage
 ## 3. Analysis.
 
 In order to identify which variables are statistically significant and which variables provide the best explanations as to what effects how much a person is charged for insurance, we used a variety of techniques to analyze the variables. Below each analysis technique is a brief explanation of the results and analysis process.
 
-### Linear Regression Models
+ Linear Regression Models
 
 We used a linear regression model to evaluate which variables are statistically significant with respect to the "charged" variable. We tested all variables against the charged variable and the results show that the age, bmi, children, and smokeryes variables are the statistically significant ones. This result allows us to conclude that these variables are the ones that affect the "charged" variable the most. 
 We can also conclude that about 75% of the variance is explained by this regression model.
@@ -183,7 +195,7 @@ We can also conclude that about 75% of the variance is explained by this regress
 mod<-lm(charges~., data=insurance)
 summary(mod)
 ```
-###Finding residuals and QQ plots for all factors
+ Finding residuals and QQ plots for all factors
 
 The histogram of the residuals is used to check whether the variance is normally distributed. The symmetric, bell-shaped curve histogram around zero shows that the normality distribution is likely to be assumed. This also lets us know that there aren't many observations that are skewed to either side and that the data is evenly distributed. 
 The QQ plot gives us a visual representation of the distribution of the error points. It tells us whether or not a data set came from a theoretical distribution. If the fit is accurate, the error points should be evenly distributed around 0, and our QQ plot below shows the error points normally distributed with a mean of 0. Even though there is a  slight deviation in the QQ plot, we can ignore this since the data set is very large and may havve some discrepancies. 
@@ -197,7 +209,7 @@ qqnorm(y=mod$residuals)
 qqline(y=mod$residuals, datax = FALSE)
 ```
 
-###Using only statistically significant factors: age, bmi, children, smoker (yes).
+### Using only statistically significant factorsage, bmi, children, smoker (yes).
 
 Using only the statistically significant variables allows us to further interpret which variables provide the biggest effect to the "charged" variable. Using the linear regression model again, we can check the statistic significance for these variables and see how much of the variance is explained by the model. The results obtained from this linear regression model show that all variables are extremely significant with a p-value < 0.001, and about 75% of the variance is explained by the model. 
 
@@ -205,6 +217,7 @@ Using only the statistically significant variables allows us to further interpre
 sigFac<-lm(charges~age + bmi + children + smoker, data=insurance)
 summary(sigFac)
 ```
+
 ### Residual Plots
 
 The following residual plots provide us with information about the error terms for the significant variables determined from the previous model. We can see from  both plots that the error terms are normally distributed with a mean of 0, which indicates that we can assume normal distribution for the data set. 
@@ -217,7 +230,9 @@ lines(density(sigFac$residuals))
 qqnorm(y=sigFac$residuals)
 qqline(y=sigFac$residuals, datax = FALSE)
 ```
+
 ### Testing Correlation With Clustering
+
 Our previous model stated that age, bmi, children, smoker (yes) were all significant factors. We are now going to perform a clustering model to see if this still holds true.
 
 The following code chunk gives us the max scaled age value.
@@ -275,7 +290,7 @@ The NBClust function was not included due to knitting issues. Returned k = 2 as 
 
 <!-- #table(nc$Best.n[1,]) -->
 
-###Optimal number of clusters using PAM
+### Optimal number of clusters using PAM
 
 We identified the optimal number of clusters using k-means and concluded that 2 clusters was the optimal number. However using just one clustering method is not always reliable, so we used PAM to corroborate the optimal number of clusters. The result indicates that the optimal number of clusters is 2.  
 
@@ -294,7 +309,8 @@ jpeg("MYPLOT.jpg")
 plot(fit.pam)
 dev.off()
 ```
-###Chi-Squared Test
+
+### Chi-Squared Test
 
 The chi-squared test performed below tells us the relation between the "charges" variable in the insurance.df and the 2 clusters created. The p-value tells us the statistical significance between these two conditions. The results obtained below are a perfect example of data that isn't exactly desired. We can see that the p-value is greater than 0.05 so it may not be statistically significant. However our models use real data and this may hint at a correlational relationship between the two variables. A p-value less than 0.7 for real data can still be considered to hint at some sort of relationship. A reason for this extremely weak correlation can be due to the fact that there are many variables that are statistically significant. Since there isn't a single strong correlation between "charged" and another variable, it might have been difficult to obtain clusters that gave a strong statistical significance in the chi-square test. 
 
@@ -302,6 +318,7 @@ The chi-squared test performed below tells us the relation between the "charges"
 cont.table <- table(insurance$charges, clusterInsurance$cluster)
 print(chisq.test(cont.table))
 ```
+
 ### How different are the clusters?
 
 As we saw from the chi-square test results above, there isn't a very strong statistical significance between the "charged" variable and the clusters. This shows that the clusters may be very different to each other. Another way we can visualize this assumption is by calculating the randIndex. A value close to 1 shows that the sets are the same and a value closer to -1 means they are different. The value obtained from the code below shows a value that is extremely far from 1. This shows that the sets may be very different from each other. 
@@ -316,7 +333,8 @@ randIndex(cont.table)
 ##Connecticut Data Exploration
 As described in the first section, we want to use the open and closing time and reason (with its respective subcategories), to draw a conclusion with the "Conclusion" variable.
 
-###Open and Closing Time Distribution
+### Open and Closing Time Distribution
+
 ```{r echo=FALSE, message = FALSE, results = FALSE, warning=FALSE}
 connecticut$TimeElapsed <- as.numeric(connecticut$Closed - connecticut$Opened)
 
