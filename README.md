@@ -5,4 +5,5 @@ We are asking the following questions: which factors impact an individual’s he
 
 Our domain spans finance, because of the insurance component; healthcare; and demographics, including sex, age, and number of children.
 
-Our data is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/insurance) and alternative sources of data like (https://data.world/datasets/insurance). 
+Our data is from Kaggle (https://www.kaggle.com/datasets/mirichoi0218/insurance) and our Connecticut data is from publicly available government data found at https://catalog.data.gov/dataset/
+insurance-company-complaints-resolutions-status-and-recoveries. 
